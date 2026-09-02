@@ -40,12 +40,17 @@ export const Footer = () => {
               </a>
             </li>
             <li>
-              <a href="/" className={styles.link}>
+              <a
+                href="https://www.linkedin.com/in/anatolii-lutai-dev/"
+                className={styles.link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {t('footer.contacts')}
               </a>
             </li>
             <li>
-              <a href="/" className={styles.link}>
+              <a href="./LICENSE" className={styles.link}>
                 {t('footer.rights')}
               </a>
             </li>
