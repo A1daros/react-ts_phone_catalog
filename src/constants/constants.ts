@@ -46,3 +46,10 @@ export const getProductById = async (
     return null;
   }
 };
+
+export const COLOR_PALETTE = {
+  midnight: '#191970',
+  spacegray: '#343d46',
+  rosegold: '#b76e79',
+  silver: '#e3e4e5',
+};

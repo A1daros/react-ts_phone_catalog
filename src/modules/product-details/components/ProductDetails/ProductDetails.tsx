@@ -7,6 +7,9 @@ import { useFavorite } from '../../../../contexts/FavoritesContext';
 import { Product } from '../../../../types/product';
 import { useCart } from '../../../../contexts/CartContext';
 import { useTranslation } from 'react-i18next';
+import { COLOR_PALETTE } from '../../../../constants';
+import { useEffect, useState } from 'react';
+import { fetchColorHex } from '../../../../utils/getColorHex';
 
 type AnyProduct = Phone | Tablet | Accessorie;
 
@@ -35,6 +38,43 @@ export const ProductDetails: React.FC<Props> = ({ product }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const [apiColors, setApiColors] = useState<Record<string, string>>({});
+
+  const colorsList = Array.isArray(product?.colorsAvailable)
+    ? product.colorsAvailable
+    : product?.colorsAvailable
+      ? [product.colorsAvailable]
+      : [];
+
+  useEffect(() => {
+    const loadCustomColors = async () => {
+      const newResolved: Record<string, string> = {};
+
+      const missingColors = colorsList.filter(
+        color =>
+          !COLOR_PALETTE[color.toLowerCase() as keyof typeof COLOR_PALETTE],
+      );
+
+      if (missingColors.length === 0) {
+        return;
+      }
+
+      await Promise.all(
+        missingColors.map(async color => {
+          const hex = await fetchColorHex(color);
+
+          newResolved[color.toLowerCase()] = hex;
+        }),
+      );
+
+      setApiColors(prev => ({ ...prev, ...newResolved }));
+    };
+
+    if (colorsList.length) {
+      loadCustomColors();
+    }
+  }, [product?.id]);
 
   const { addToCart, removeFromCart, cart } = useCart();
   const { addToFavorite, removeFromFavorite, favorite } = useFavorite();
@@ -83,10 +123,6 @@ export const ProductDetails: React.FC<Props> = ({ product }) => {
   };
 
   const unifiedProduct = convertToProduct(product);
-
-  const colorsList = Array.isArray(product.colorsAvailable)
-    ? product.colorsAvailable
-    : [product.colorsAvailable];
 
   const capacityList = Array.isArray(product.capacityAvailable)
     ? product.capacityAvailable
@@ -170,11 +206,20 @@ export const ProductDetails: React.FC<Props> = ({ product }) => {
 
             <div className={styles.colorsGrid}>
               {colorsList.map((color, index) => {
+                const normalized = color.toLowerCase();
                 const colorInputId = `${product.id}-color-${index}`;
-                const isSelected = currentPriceColor === color.toLowerCase();
+                const isSelected = currentPriceColor === normalized;
+
+                const finalBgColor =
+                  COLOR_PALETTE[normalized as keyof typeof COLOR_PALETTE] ||
+                  apiColors[normalized] ||
+                  color;
 
                 return (
-                  <div key={colorInputId} className={styles.colorWrapper}>
+                  <div
+                    key={`${product.id}-${normalized}`}
+                    className={styles.colorWrapper}
+                  >
                     <input
                       id={colorInputId}
                       type="radio"
@@ -187,7 +232,9 @@ export const ProductDetails: React.FC<Props> = ({ product }) => {
                     <label
                       htmlFor={colorInputId}
                       className={`${styles.colorLabel} ${isSelected ? styles.isActive : ''}`}
-                      style={{ backgroundColor: color }}
+                      style={{
+                        backgroundColor: finalBgColor,
+                      }}
                       title={color}
                     >
                       <span className={styles.visuallyHidden}>{color}</span>
