@@ -50,7 +50,7 @@ export const Footer = () => {
               </a>
             </li>
             <li>
-              <a href="./LICENSE" className={styles.link}>
+              <a href="/LICENSE" className={styles.link}>
                 {t('footer.rights')}
               </a>
             </li>
