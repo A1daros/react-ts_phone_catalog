@@ -1,21 +1,28 @@
-import React from 'react';
-import './App.scss';
+import styles from './styles/App.module.scss';
+import './styles/App.module.scss';
+import { Outlet } from 'react-router-dom';
+import { Header } from './modules/shared/components/Layout/Header';
+import { Footer } from './modules/shared/components/Layout/Footer';
+import { FavoriteProvider } from './contexts/FavoritesContext';
+import { CartProvider } from './contexts/CartContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
-interface Props {
-  onClick: () => void;
-  children: React.ReactNode;
-}
-
-export const Provider: React.FC<Props> = React.memo(({ onClick, children }) => (
-  <button type="button" onClick={onClick}>
-    {children}
-  </button>
-));
-
-export const App: React.FC = () => {
+export const App = () => {
   return (
-    <div className="starter">
-      <Provider onClick={() => ({})}>TodoList</Provider>
-    </div>
+    <FavoriteProvider>
+      <CartProvider>
+        <ThemeProvider>
+          <div className={styles.appLayout}>
+            <Header />
+
+            <main className={styles.mainContent}>
+              <Outlet />
+            </main>
+
+            <Footer />
+          </div>
+        </ThemeProvider>
+      </CartProvider>
+    </FavoriteProvider>
   );
 };
